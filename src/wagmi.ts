@@ -1,37 +1,27 @@
-import { configureChains, createConfig } from 'wagmi'
-import { goerli, mainnet } from 'wagmi/chains'
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
-import { InjectedConnector } from 'wagmi/connectors/injected'
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
+import { http, cookieStorage, createConfig, createStorage } from "wagmi";
+import { base } from "wagmi/chains";
+import { coinbaseWallet, injected, walletConnect } from "wagmi/connectors";
 
-import { publicProvider } from 'wagmi/providers/public'
-
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet, ...(process.env.NODE_ENV === 'development' ? [goerli] : [])],
-  [
-    publicProvider(),
-  ],
-)
-
-export const config = createConfig({
-  autoConnect: true,
-  connectors: [
-    new MetaMaskConnector({ chains }),
-    new CoinbaseWalletConnector({
-      chains,
-      options: {
-        appName: 'wagmi',
-      },
+export function getConfig() {
+  return createConfig({
+    chains: [base],
+    connectors: [
+      injected(),
+      coinbaseWallet(),
+      walletConnect({ projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || "" }),
+    ],
+    storage: createStorage({
+      storage: cookieStorage,
     }),
-    new InjectedConnector({
-      chains,
-      options: {
-        name: 'Injected',
-        shimDisconnect: true,
-      },
-    }),
-  ],
-  publicClient,
-  webSocketPublicClient,
-})
+    ssr: true,
+    transports: {
+      [base.id]: http(),
+    },
+  });
+}
+
+declare module "wagmi" {
+  interface Register {
+    config: ReturnType<typeof getConfig>;
+  }
+}
