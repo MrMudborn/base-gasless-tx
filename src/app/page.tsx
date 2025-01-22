@@ -1,3 +1,70 @@
+/**
+ * Base paymaster integration Guide
+ * ------------------------------
+ * This component demonstrates NFT minting with different wallet types and gas sponsorship options.
+ *
+ * Key Features:
+ * 1. Supports both Coinbase Wallet (with paymaster) and other wallets
+ * 2. Implements gas sponsorship via paymaster on Base network
+ * 3. Handles different transaction types (AA and regular transactions)
+ *
+ * Transaction Functions:
+ * ---------------------
+ * 1. writeContracts (for Coinbase Wallet):
+ *    - Supports gas sponsorship via paymaster
+ *    - Returns AA-type transaction hash
+ *    - Used when connector type is 'coinbaseWallet'
+ *
+ * 2. writeContract (for other wallets):
+ *    - Standard transaction without gas sponsorship
+ *    - Returns regular transaction hash (Bundle transaction hash)
+ *    - Used for all other wallet types
+ *
+ * Gas Sponsorship:
+ * ---------------
+ * - Only available on Base network with Coinbase Smart Wallet
+ * - Requires valid paymaster capabilities
+ * - When sponsored, user doesn't pay gas fees
+ *
+ * Transaction Hash Types:
+ * ---------------------
+ * 1. AA Transaction Hash (from writeContracts):
+ *    - First 66 characters represent the actual transaction
+ *    - Cannot be used with useWaitForTransactionReceipt
+ *
+ * 2. Bundle Transaction Hash (from writeContract):
+ *    - Standard transaction hash
+ *    - Can be used with useWaitForTransactionReceipt
+ *
+ * Example Transaction Hashes:
+ * -------------------------
+ * 1. Sponsored AA Transaction (Base + writeContracts):
+ *    0x25a9852ef9f1f1f05acc8192c8b1cd2b91d2591774f8fdc8834e324f6c585253
+ *
+ * 2. Non-Sponsored AA Transaction (Base + writeContracts):
+ *    0xd05526148d43f2f624fb95f84fa5ea492f8638e3ed7f520cef8535706bb5cc2f
+ *
+ * 3. Standard Transaction (Base + writeContract):
+ *    0x1791f5e3564960fc8889242d757b65b519cd8b4617e23a22efa537670b3ef00d
+ *
+ * @see https://wagmi.sh/react/api/hooks/useWriteContracts
+ * @see https://wagmi.sh/react/api/hooks/useWriteContract
+ */
+
+/**
+ * Success tx hashes
+ * check on https://basescan.org/
+ *
+ * Base. Sponsored. writeContracts func
+ * hash =  "0x25a9852ef9f1f1f05acc8192c8b1cd2b91d2591774f8fdc8834e324f6c585253"
+ *
+ * Base. Not sponsored. writeContracts func
+ * hash = "0xd05526148d43f2f624fb95f84fa5ea492f8638e3ed7f520cef8535706bb5cc2f"
+ *
+ * Base, No sponsored, writeContract func
+ * hash = "0x1791f5e3564960fc8889242d757b65b519cd8b4617e23a22efa537670b3ef00d"
+ */
+
 "use client";
 
 import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts";
@@ -61,23 +128,6 @@ function App() {
     hash: txHash, // supports bundle tx hash not AA tx hash.
   });
 
-  // Base. Sponsored. writeContracts func
-  // hash =  "0x25a9852ef9f1f1f05acc8192c8b1cd2b91d2591774f8fdc8834e324f6c585253";
-
-  // Base. Not sponsored. writeContracts func
-  // hash = "0xd05526148d43f2f624fb95f84fa5ea492f8638e3ed7f520cef8535706bb5cc2f"
-
-  // Base, No sponsored, writeContract func
-  // hash = "0x1791f5e3564960fc8889242d757b65b519cd8b4617e23a22efa537670b3ef00d"
-
-  /**
-   * Paymaster is only supported n Base with CoinsBase smart wallet. Is only works with writeContracts funtion with capabilities valus.
-   * If capabilities values correct and has valid paymaster then gas will be sponsored otherwise it will ask to pay it.
-   * Currenlty writeContracts funtion is only supported by the CoinsBase smart wallet. If you are using other wallets then use writeContract funtion
-   * writeContracts funtion = https://wagmi.sh/react/api/hooks/useWriteContracts
-   * writeContract funtion = https://wagmi.sh/react/api/hooks/useWriteContract
-   */
-
   console.log({ writeError, writesError });
   console.log({ isPending, isSuccess, hashError, hashStatus, receipt });
 
@@ -86,8 +136,8 @@ function App() {
     "TEST",
     "0xfffffffffff",
     "500",
-    "0xFAB7A6a2C0506D07348492F9D6f20eC56A47E664",
-    "0xFAB7A6a2C0506D07348492F9D6f20eC56A47E664",
+    "0x62b14E5D09BC0C340116B5BC87d787377C07A820",
+    "0x62b14E5D09BC0C340116B5BC87d787377C07A820",
     {
       publicSalePrice: "0",
       maxSalePurchasePerAddress: "4294967295",
@@ -101,7 +151,7 @@ function App() {
     "This is my Poster Collection",
     "0x0",
     "0x0",
-    "0x77fAD8D0FcfD481dAf98D0D156970A281e66761b",
+    "0x62b14E5D09BC0C340116B5BC87d787377C07A820",
   ];
 
   // Check for paymaster capabilities with `useCapabilities`
